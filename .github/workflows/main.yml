@@ -1,0 +1,44 @@
+
+name: Build Floatee AI APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'FloateeAI-Final-v1.1-Source.zip'
+      - '.github/workflows/main.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Extract source code
+        run: |
+          unzip -q FloateeAI-Final-v1.1-Source.zip -d source
+          ls -la source/FloateeAI-Final
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build APK
+        run: |
+          cd source/FloateeAI-Final
+          gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: FloateeAI-APK
+          path: source/FloateeAI-Final/app/build/outputs/apk/debug/*.apk
